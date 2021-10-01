@@ -1,5 +1,5 @@
 const express = require('express');
-const bodyParser = require('body-parser');
+var bodyParser = require('body-parser')
 const cors = require('cors');
 const mysql = require('mysql');
 
@@ -13,6 +13,15 @@ var connection = mysql.createConnection({
 });
 
 connection.connect();
+
+app.use(cors( {origin: '*' } ));
+//app.use( bodyParser.json() );       // to support JSON-encoded bodies
+//app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+//  extended: true
+//})); 
+app.use(express.json());       // to support JSON-encoded bodies
+app.use(express.urlencoded()); // to support URL-encoded bodies
+//app.use(express.bodyParser());
 
 //Testing
 app.get('/test', function (req, res){
@@ -49,12 +58,16 @@ app.get('/donation/:id', function (req, res){
 //Add new donation
 app.post('/donation/new', function (req, res){
     //NOT WORKING
-    var query='INSERT INTO donacion (id, fecha, entregado, transportista_id, receptor_id, donante_id) VALUES ('+req.body.donation.id+','+req.body.donation.fecha+','+req.body.donation.entregado+','+req.body.donation.transportista_id+','+req.body.donation.receptor_id+','+req.body.donation.donante_id+');'+
-    'INSERT INTO donacion_has_Producto (donacion_id, Producto_id, cantidad) VALUES ('+req.body.donation.id+','+req.body.donation.producto_id+','+req.body.donation.cantidad+');';
+    console.log(req.body);
+    var query='INSERT INTO donacion_has_Producto (donacion_id, Producto_id, cantidad) VALUES ('+req.body.id+',99,'+req.body.cantidad+');';
+    connection.query(query, function (error, response, fields) {
+        if (error) throw error; 
+    });
+    var query='INSERT INTO donacion (id, fecha, entregado, transportista_id, receptor_id, donante_id) VALUES ('+req.body.id+','+String(req.body.fecha)+',0,12,22,31);';
     connection.query(query, function (error, response, fields) {
         if (error) throw error;
-        res.status(200).json({msg: "Donation registered!"});
     });
+    res.status(200).json({msg: "Donation registered!"});
 });
 
 //Donations by receiver id
@@ -94,8 +107,5 @@ app.get('/transports', function (req, res){
 });
 
 app.post('')
-
-app.use(cors( {origin: '*' } ));
-app.use(bodyParser.json());
 
 module.exports = app;
